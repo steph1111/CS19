@@ -1,13 +1,9 @@
 /**
  * @file cs19_linked_list_raw_pointers_iterable.h
- * @author Stephanie L'Heureux (salhaureux)
+ * @author Stephanie L'Heureux (steph1111)
  * @date 11/28/22
  *
- * Linked-list operations on anything but the ends of a list are
- * only useful given pointers/iterators to list elements!
- * You shall add a range constructor and several public member
- * functions to your cs19::LinkedList class that provide efficient
- * iterator-based operations, similar to those in std::list
+ * Class that emulates a std::list
  */
 #ifndef CS19_LINKED_LIST_RAW_POINTERS_ITERABLE_H_
 #define CS19_LINKED_LIST_RAW_POINTERS_ITERABLE_H_
@@ -16,6 +12,8 @@
 #include <iostream>
 
 // TODO: Add comments to each functions
+// FIXME: Possible seg fault on splice() (4)
+// FIXME: Incorrect recturn values on erase() 
 
 namespace cs19 {
 template <typename T>
