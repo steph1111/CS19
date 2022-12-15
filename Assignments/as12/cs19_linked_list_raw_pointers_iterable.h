@@ -4,6 +4,8 @@
  * @date 11/28/22
  *
  * Class that emulates a std::list
+ * Documentation:
+ * http://jeff.cis.cabrillo.edu/datasets/docs_cs19_linked_list_raw_pointers_iterable/classcs19_1_1LinkedList.html
  */
 #ifndef CS19_LINKED_LIST_RAW_POINTERS_ITERABLE_H_
 #define CS19_LINKED_LIST_RAW_POINTERS_ITERABLE_H_
@@ -11,9 +13,8 @@
 #include <initializer_list>
 #include <iostream>
 
-// TODO: Add comments to each functions
 // FIXME: Possible seg fault on splice() (4)
-// FIXME: Incorrect recturn values on erase() 
+// FIXME: Incorrect return values on erase() 
 
 namespace cs19 {
 template <typename T>
@@ -23,19 +24,44 @@ class LinkedList {
 
  public:
   LinkedList() {}
-
+  /**
+   * Constructs a LinkedList from an std::initializer_list
+   * 
+   * @param init_list The initializer list construct a LinkedList from
+   */
   LinkedList(std::initializer_list<T> init_list) {
     for (const auto& val : init_list) {
       this->push_back(val);
     }
   }
 
+  /**
+   * Constructs a LinkedList from another LinkedList
+   * 
+   * @param another Another LinkedList construct a LinkedList from
+   */
   LinkedList(const LinkedList<T>& another) {
     for (Node* cur = another.head_; cur; cur = cur->next) {
       this->push_back(cur->data);
     }
   }
 
+  /**
+   * Constructs a list with as many elements as the range [first,last), with
+   * each element constructed from its corresponding element in 
+   * that range, in the same order.
+   * 
+   * @param first Iterator to start from (inclusive)
+   * @param last Iterator to end with (exclusive/past the end)
+   */
+  template <typename InputIterator>
+  LinkedList(InputIterator first, InputIterator last) {
+    for (; first != last; ++first) this->push_back(*first);
+  }
+
+  /**
+   * Distructor for a LinkedList object. Deletes all new nodes
+   */
   ~LinkedList() {
     while (this->head_) {
       Node* old_head = this->head_;
@@ -45,16 +71,10 @@ class LinkedList {
   }
 
   /**
-   * Constructs a list with as many elements as the range [first,last), with
-   * each element
-   * constructed from its corresponding element in that range, in the same
-   * order.
+   * Returns a reference to the value in the last element in this list.
+   * 
+   * @return the last element in the LinkedList
    */
-  template <typename InputIterator>
-  LinkedList(InputIterator first, InputIterator last) {
-    for (; first != last; ++first) this->push_back(*first);
-  }
-
   T& back() const {
     if (this->size_ == 0) {
       throw std::domain_error("List is empty");
@@ -62,8 +82,18 @@ class LinkedList {
     return this->tail_->data;
   }
 
+  /**
+   * Returns whether the list container is empty
+   * 
+   * @return true if the size is 0, else false
+   */
   bool empty() const { return !(this->size_); }
 
+  /**
+   * Returns a reference to the value in the first element in this list.
+   * 
+   * @return the first element in the LinkedList
+   */
   T& front() const {
     if (this->size_ == 0) {
       throw std::domain_error("List is empty");
@@ -71,6 +101,40 @@ class LinkedList {
     return this->head_->data;
   }
 
+  /**
+   * Replaces the contents of this list with a copy of each element 
+   * in 'another', in the same order.
+   * 
+   * @param another the LinkedList from which to copy
+   */
+  LinkedList& operator=(const LinkedList<T>& another) {
+    this->clear();
+    for (Node* other = another.head_; other; other = other->next) {
+      this->push_back(other->data);
+    }
+    return *this;
+  }
+
+  /**
+   * Replaces the contents of this list with a copy of each element 
+   * in 'init_list', in the same order.
+   * 
+   * @param another the std::initializer_list from which to copy
+   */
+  LinkedList& operator=(std::initializer_list<T> init_list) {
+    this->clear();
+    for (const auto& val : init_list) {
+      this->push_back(val);
+    }
+    return *this;
+  }
+
+  /**
+   * Compares this list with 'another' for inequality.
+   * 
+   * @return whether the two lists do not contain the same number of 
+   * elements, with the same values, in the same order
+   */
   bool operator!=(const LinkedList<T>& another) {
     if (another.size() != this->size_) return true;
     Node* orig = this->head_;
@@ -83,27 +147,12 @@ class LinkedList {
     return false;
   }
 
-  //  for (Node* orig = this->head_, other = another.head_; orig; orig =
-  //  orig->next, other = other->next) {
-  //    if (orig != other) return true;
-  //  }
-
-  LinkedList& operator=(const LinkedList<T>& another) {
-    this->clear();
-    for (Node* other = another.head_; other; other = other->next) {
-      this->push_back(other->data);
-    }
-    return *this;
-  }
-
-  LinkedList& operator=(std::initializer_list<T> init_list) {
-    this->clear();
-    for (const auto& val : init_list) {
-      this->push_back(val);
-    }
-    return *this;
-  }
-
+  /**
+   * Compares this list with another for equality.
+   * 
+   * @return whether the two lists contain the same number of 
+   * elements, with the same values, in the same order
+   */
   bool operator==(const LinkedList<T>& another) {
     if (another.size() != this->size_) return false;
     Node* orig = this->head_;
@@ -116,6 +165,9 @@ class LinkedList {
     return true;
   }
 
+  /**
+   * Deletes the last value in this list.
+   */
   void pop_back() {
     if (this->size_ == 0) {
       throw std::domain_error("List is empty");
@@ -131,6 +183,9 @@ class LinkedList {
     delete old_tail;
   }
 
+  /**
+   * Deletes the first value in this list.
+   */
   void pop_front() {
     if (this->size_ == 0) {
       throw std::domain_error("List is empty");
@@ -146,6 +201,11 @@ class LinkedList {
     delete old_head;
   }
 
+  /**
+   * Appends a new element to this list, after its current last element.
+   * 
+   * @param val the value to be copied to the appended element
+   */
   void push_back(const T& val) {
     Node* new_node = new Node{val};
     if (this->size_) {
@@ -158,6 +218,11 @@ class LinkedList {
     ++this->size_;
   }
 
+  /**
+   * Prepends a new element to this list, before its current first element.
+   * 
+   * @param val the value to be copied to the prepended element
+   */
   void push_front(const T& val) {
     Node* new_node = new Node{val};
     if (this->size_) {
@@ -170,6 +235,11 @@ class LinkedList {
     ++this->size_;
   }
 
+  /**
+   * Removes from the container all the elements that compare equal to 'val'.
+   * 
+   * @param val	value of the elements to be removed
+   */
   void remove(const T& val) {
     if (this->size_ > 2) {
       Node* cur = this->head_->next;
@@ -192,6 +262,16 @@ class LinkedList {
     }
   }
 
+  /**
+   * Resizes the list so that it contains n elements.
+   * 
+   * If 'n' is smaller than the current list size, the content is reduced to its 
+   * first 'n' elements, removing those beyond (and destroying them). If 'n' is 
+   * greater than the current list size, the content is expanded by inserting 
+   * at the end as many elements as needed to reach a size of 'n'.
+   * 
+   * @param n the new size for the list
+   */
   void resize(std::size_t n) {
     T val;
     while (this->size_ > n) {
@@ -202,6 +282,17 @@ class LinkedList {
     }
   }
 
+  /**
+   * Resizes the list so that it contains n elements.
+   * 
+   * If 'n' is smaller than the current list size, the content is reduced to its 
+   * first 'n' elements, removing those beyond (and destroying them). If 'n' is 
+   * greater than the current list size, the content is expanded by inserting 
+   * at the end as many elements as needed to reach a size of 'n'.
+   * 
+   * @param n the new size for the list
+   * @param fill_value	the value to place in any new elements
+   */
   void resize(std::size_t n, const T& fill_value) {
     while (this->size_ > n) {
       this->pop_back();
@@ -217,6 +308,10 @@ class LinkedList {
     }
   }
 
+  /**
+   * Reverses the order of the elements in this list. 
+   * No element is created nor destroyed.
+   */
   void reverse() {
     Node* cur = this->head_;
     while (cur) {
@@ -230,8 +325,16 @@ class LinkedList {
     this->head_ = temp;
   }
 
+  /**
+   * Returns the number of elements in this list 
+   * 
+   * @return The number of elements in this list
+   */
   std::size_t size() const { return this->size_; }
 
+  /**
+   * Removes duplicate values in order from this list.
+   */
   void unique() {
     if (this->size_ == 0) return;
     Node* cur = this->head_->next;
@@ -254,15 +357,9 @@ class LinkedList {
       }
     }
   }
+
   /**
-  * @brief Returns an iterator pointing to the first element in this list.
-  *
-  * Notice that, unlike `front()`, which returns a reference to the first
-  * element, this function
-  * returns a bidirectional iterator pointing to it.
-  *
-  * If this list is empty, the returned iterator value shall not be
-  * dereferenced.
+  * Returns an iterator pointing to the first element in this list.
   *
   * @return An iterator to the beginning of the sequence.
   */
@@ -272,27 +369,12 @@ class LinkedList {
   }
 
   /**
-   * @brief Returns an iterator referring to the past-the-end element in this
+   * Returns an iterator referring to the past-the-end element in this
    * list.
-   *
-   * The past-the-end element is the theoretical element that would follow the
-   * last element in the
-   * list. It does not point to any element, and thus shall not be dereferenced.
-   *
-   * Because the ranges used by functions of the standard library do not include
-   * the element pointed
-   * by their closing iterator, this function is often used in combination with
-   * `begin()` to
-   * specify a range including all the elements in the list.
-   *
-   * If this list is empty, this function returns the same as `begin()`. @see
-   * TODO
    *
    * @return An iterator to the element past the end of the sequence.
    */
   Iterator end() {
-    // Node* temp = new Node{this->tail_->data};
-    // Node* new_node = new Node{val};
     Iterator it(nullptr, this->tail_);
     return it;
   }
@@ -553,6 +635,12 @@ class LinkedList {
     }
   }
 
+  /**
+   * inserts this list into an ostream, with the format [element1, element2, element3, ...].
+   * 
+   * @param out	ostream object where the list is inserted
+   * @param list the list object to insert
+   */
   friend std::ostream& operator<<(std::ostream& out,
                                   const LinkedList<T>& list) {
     out << '[';
